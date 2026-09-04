@@ -8,14 +8,11 @@ pub(crate) fn get_event_socket_path() -> Result<String, String> {
     };
 
     let hyprland_instance_signature = match std::env::var("HYPRLAND_INSTANCE_SIGNATURE") {
-        Ok(val) => val,
-        Err(_) => {
-            let wayland_display = std::env::var("WAYLAND_DISPLAY").ok();
-            search_for_current_hyprland_instance_signature(
-                &xdg_runtime_dir,
-                wayland_display.as_deref(),
-            )
-        }
+        Ok(signature) if instance_is_active(&xdg_runtime_dir, &signature) => signature,
+        _ => search_for_current_hyprland_instance_signature(
+            &xdg_runtime_dir,
+            std::env::var("WAYLAND_DISPLAY").ok().as_deref(),
+        ),
     };
 
     // construct path
@@ -26,9 +23,24 @@ pub(crate) fn get_event_socket_path() -> Result<String, String> {
     return Ok(event_socket_path);
 }
 
-// fallback for when environment variables are not set
+// fallback/verification code for when environment variables are not set properly
 // this happened to me when testing from a stale tmux server
 // warning: written by gpt-5.6 sol
+
+fn instance_is_active(runtime_dir: &str, signature: &str) -> bool {
+    let lock = Path::new(runtime_dir)
+        .join("hypr")
+        .join(signature)
+        .join("hyprland.lock");
+    let Ok(contents) = std::fs::read_to_string(lock) else {
+        return false;
+    };
+    let Some(pid) = contents.lines().next() else {
+        return false;
+    };
+
+    pid.parse::<u32>().is_ok() && Path::new("/proc").join(pid).exists()
+}
 fn search_for_current_hyprland_instance_signature(
     xdg_runtime_dir: &String,
     wayland_display: Option<&str>,
