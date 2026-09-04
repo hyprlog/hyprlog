@@ -1,3 +1,4 @@
+#[derive(Debug, PartialEq)]
 pub enum Event {
     Workspace {
         workspace_id: i64,
@@ -121,6 +122,7 @@ pub enum Event {
     },
 }
 
+#[derive(Debug, PartialEq)]
 struct WindowAddress {
     address: String,
 }
