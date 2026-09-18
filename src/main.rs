@@ -1,6 +1,8 @@
 mod events;
 mod parsing;
+mod socket1;
 mod socket2;
+mod socket_helpers;
 
 #[cfg(test)]
 #[path = "tests/parsing.rs"]

@@ -1,7 +1,4 @@
-use crate::socket_helpers::{instance_is_active, search_for_current_hyprland_instance_signature};
-use std::path::Path;
-
-pub(crate) fn get_event_socket_path() -> Result<String, String> {
+pub(crate) fn get_command_socket_path() -> Result<String, String> {
     // resolve required env vars
     let xdg_runtime_dir = match std::env::var("XDG_RUNTIME_DIR") {
         Ok(val) => val,
